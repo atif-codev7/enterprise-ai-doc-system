@@ -1,0 +1,69 @@
+version: "3.9"
+
+services:
+  # PostgreSQL with pgvector extension (pg16)
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: docintel-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+      POSTGRES_DB: docintel
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d docintel"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis for Cache & Rate Limiting
+  redis:
+    image: redis:7-alpine
+    container_name: docintel-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # FastAPI AI Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: docintel-backend
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+psycopg://postgres:postgrespassword@postgres:5432/docintel
+      - HNSW_M=16
+      - HNSW_EF_CONSTRUCTION=64
+      - HNSW_EF_SEARCH=40
+      - EMBEDDING_PROVIDER=mock
+      - LLM_PROVIDER=deterministic-sim
+      - GUARDRAIL_CONFIDENCE_THRESHOLD=0.75
+    ports:
+      - "8002:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: docintel-frontend
+    restart: always
+    environment:
+      - NODE_ENV=production
+    ports:
+      - "3002:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
