@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, ShieldAlert, CheckCircle, Lock } from "lucide-react";
+import { ShieldAlert, CheckCircle } from "lucide-react";
 
 interface GuardrailAlertsProps {
   guardrail: {
@@ -18,44 +18,46 @@ export default function GuardrailAlerts({ guardrail }: GuardrailAlertsProps) {
 
   if (guardrail.is_safe) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs">
-        <CheckCircle className="h-3.5 w-3.5 shrink-0" />
-        <span>Guardrail Verified Safe (Risk Confidence: {Math.round(guardrail.risk_score * 100)}%)</span>
+      <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#13161f] border border-white/[0.08] text-[#9aa2b4] text-xs">
+        <CheckCircle className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+        <span className="font-mono text-[11px] tabular-nums">
+          Guardrail verified safe &middot; Risk score: {Math.round(guardrail.risk_score * 100)}%
+        </span>
       </div>
     );
   }
 
   return (
-    <div className="p-4 rounded-lg bg-red-950/40 border border-red-500/40 text-red-200 text-xs space-y-2 animate-in fade-in duration-200">
-      <div className="flex items-center gap-2 text-red-400 font-semibold text-sm">
-        <ShieldAlert className="h-5 w-5 shrink-0 animate-bounce" />
-        <span>Security Intervention: Adversarial Prompt-Injection Blocked</span>
+    <div className="p-3.5 rounded-lg bg-[#1a1215] border border-red-500/30 text-[#eef1f6] text-xs space-y-2.5">
+      <div className="flex items-center gap-2 text-red-400 font-medium">
+        <ShieldAlert className="h-4 w-4 shrink-0" />
+        <span>Security intervention: adversarial prompt injection intercepted</span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-        <div className="bg-slate-900/80 p-2.5 rounded border border-red-900/50">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">Threat Risk Score</span>
-          <span className="text-base font-mono font-bold text-red-400">
-            {Math.round(guardrail.risk_score * 100)}% Risk Probability
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+        <div className="bg-[#13161f] p-2.5 rounded border border-white/[0.06]">
+          <span className="text-[#646c80] block text-[10px]">Threat probability</span>
+          <span className="font-mono font-medium text-red-400 tabular-nums">
+            {Math.round(guardrail.risk_score * 100)}% confidence
           </span>
         </div>
 
-        <div className="bg-slate-900/80 p-2.5 rounded border border-red-900/50">
-          <span className="text-slate-400 block text-[10px] uppercase font-bold">Enforcement Action</span>
-          <span className="text-sm font-semibold text-amber-300">
-            Execution Terminated at Guardrail Node
+        <div className="bg-[#13161f] p-2.5 rounded border border-white/[0.06]">
+          <span className="text-[#646c80] block text-[10px]">Policy enforcement</span>
+          <span className="text-[#9aa2b4]">
+            Execution terminated at guardrail node
           </span>
         </div>
       </div>
 
       {guardrail.violated_rules.length > 0 && (
-        <div>
-          <span className="text-slate-400 block text-[11px] mb-1">Triggered Security Rules:</span>
-          <div className="flex flex-wrap gap-1.5">
+        <div className="pt-1">
+          <span className="text-[#646c80] block text-[10px] mb-1">Triggered rules</span>
+          <div className="flex flex-wrap gap-1">
             {guardrail.violated_rules.map((rule, idx) => (
               <span
                 key={idx}
-                className="px-2 py-0.5 rounded bg-red-900/60 text-red-200 text-[10px] font-mono border border-red-700/50"
+                className="px-1.5 py-0.5 rounded bg-white/[0.05] text-[#9aa2b4] text-[10px] font-mono border border-white/[0.08]"
               >
                 {rule}
               </span>
